@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin ERP Pro | Camila Silva</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root { --bg: #1e1e2f; --sidebar: #27293d; --primary: #e14eca; --text: #fff; --success: #00f2c3; --danger: #fd5d93; --card-bg: #2e2e40; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Roboto', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+    
+    /* STATUS CONEXÃO */
+    #connectionStatus { position: fixed; top: 10px; right: 20px; z-index: 1000; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .status-ok { background: rgba(0, 242, 195, 0.2); color: var(--success); border: 1px solid var(--success); }
+    .status-err { background: rgba(253, 93, 147, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+
+    /* SIDEBAR */
+    .sidebar { width: 260px; background: var(--sidebar); padding: 20px; display: flex; flex-direction: column; border-right: 1px solid #333; flex-shrink: 0; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: var(--primary); margin-bottom: 40px; text-align: center; letter-spacing: 1px; }
+    .nav-btn { background: transparent; border: none; color: #aaa; text-align: left; padding: 15px; font-size: 1rem; cursor: pointer; border-radius: 8px; margin-bottom: 8px; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+    .nav-btn:hover, .nav-btn.active { background: var(--primary); color: white; }
+    
+    /* MAIN */
+    .main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+    .view { display: none; animation: fade 0.3s; }
+    .view.active { display: block; }
+    @keyframes fade { from {opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
+
+    /* CARDS */
+    .card { background: var(--card-bg); padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    h1 { margin: 0 0 20px 0; font-weight: 300; }
+    
+    /* DASHBOARD KPI */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .kpi-card { background: linear-gradient(135deg, var(--sidebar), #303040); padding: 20px; border-radius: 12px; border-left: 5px solid var(--primary); }
+    .kpi-val { font-size: 2.2rem; font-weight: bold; margin-top: 10px; }
+
+    /* AGENDA LIST */
+    .agenda-item { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #555; }
+    .agenda-item.booked { border-left-color: var(--success); background: rgba(0, 242, 195, 0.05); }
+    .ag-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .time-badge { font-size: 1.2rem; font-weight: bold; background: #444; padding: 5px 10px; border-radius: 6px; }
+    .booked .time-badge { background: var(--success); color: #000; }
+    .ag-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; color: #ccc; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+    .ag-price { color: var(--success); font-weight: bold; font-size: 1.1rem; }
+    .ag-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* RESUMO DIARIO */
+    .summary-bar { display: flex; gap: 20px; margin-bottom: 20px; background: rgba(225, 78, 202, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--primary); }
+    .sum-item strong { display: block; font-size: 1.2rem; color: var(--text); }
+    .sum-item span { font-size: 0.85rem; color: var(--primary); text-transform: uppercase; }
+
+    /* INPUTS & BTNS */
+    input, select, textarea { width: 100%; padding: 12px; background: #1b1b29; border: 1px solid #444; color: white; border-radius: 6px; margin-bottom: 15px; }
+    .btn { padding: 8px 20px; border-radius: 30px; border: none; cursor: pointer; font-weight: bold; }
+    .btn-p { background: var(--primary); color: white; }
+    .btn-s { background: transparent; border: 1px solid #666; color: #ccc; }
+    .btn-del { background: rgba(253,93,147,0.1); color: var(--danger); border: 1px solid var(--danger); }
+    .btn-whats { background: #25D366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; display: inline-block; }
+
+    /* MODAL */
+    .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index: 1000; backdrop-filter: blur(3px); }
+    .modal-content { background: var(--sidebar); padding: 30px; border-radius: 15px; width: 90%; max-width: 450px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; gap: 10px; }
+      .logo { display: none; }
+      .nav-btn { padding: 10px; white-space: nowrap; }
+      .ag-details { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="connectionStatus">Verificando...</div>
+
+<div class="sidebar">
+  <div class="logo">Camila ERP</div>
+  <button id="btn-dash" class="nav-btn active" onclick="show('dash')">📊 Dashboard</button>
+  <button id="btn-agenda" class="nav-btn" onclick="show('agenda')">📅 Agenda</button>
+  <button id="btn-servicos" class="nav-btn" onclick="show('servicos')">💅 Serviços</button>
+  <button id="btn-clientes" class="nav-btn" onclick="show('clientes')">👥 Clientes</button>
+  <div style="flex:1"></div>
+  <button class="nav-btn" onclick="openSite()">🌐 Ver Site</button>
+</div>
+
+<div class="main">
+
+  <div id="dash" class="view active">
+    <h1>Visão Geral Financeira</h1>
+    <div class="kpi-grid">
+      <div class="kpi-card"><small>Receita Hoje</small><div class="kpi-val" id="kpiHoje">...</div></div>
+      <div class="kpi-card" style="border-color:var(--success)"><small>Receita Mês</small><div class="kpi-val" id="kpiMes">...</div></div>
+    </div>
+    <div class="card">
+      <h3>Faturamento Semanal</h3>
+      <div style="height:250px"><canvas id="chartFin"></canvas></div>
+    </div>
+  </div>
+
+  <div id="agenda" class="view">
+    <h1>Agenda de Atendimentos</h1>
+    
+    <div class="card" style="border:1px solid var(--primary); background: rgba(225, 78, 202, 0.05);">
+      <h3 style="color:var(--primary); margin-top:0">+ Novo Horário na Agenda</h3>
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
+        <div style="flex:1"><label>Data</label><input type="date" id="mData"></div>
+        <div style="flex:1"><label>Hora</label><input type="time" id="mHora"></div>
+      </div>
+      <button class="btn btn-p" style="width:100%" onclick="addManual()">Adicionar Disponibilidade</button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+        <h3 style="margin:0">Gerenciar Horários</h3>
+        <div style="display:flex; gap:10px">
+          <input type="text" id="searchClient" placeholder="🔍 Buscar Cliente..." onkeyup="filterList()" style="margin:0; padding:8px">
+          <input type="date" id="filterDate" onchange="loadAgenda()" style="margin:0; width:auto">
+          <button class="btn btn-s" onclick="loadAgenda()">🔄</button>
+        </div>
+      </div>
+
+      <div class="summary-bar" id="daySummary" style="display:none">
+        <div class="sum-item"><span>Agendamentos</span><strong id="sumCount">0</strong></div>
+        <div class="sum-item"><span>Previsto</span><strong id="sumTotal">R$ 0,00</strong></div>
+      </div>
+
+      <div id="agendaList">Selecione uma data ou aguarde...</div>
+    </div>
+  </div>
+
+  <div id="servicos" class="view">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+      <h1>Serviços</h1>
+      <button class="btn btn-p" onclick="openModal('modalServico')">+ Novo</button>
+    </div>
+    <div class="card" id="serviceList">Carregando...</div>
+  </div>
+
+  <div id="clientes" class="view">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+      <h1>Clientes</h1>
+      <button class="btn btn-p" onclick="openModal('modalCliente')">+ Novo</button>
+    </div>
+    <div class="card" id="clientList">Carregando...</div>
+  </div>
+
+</div>
+
+<div id="modalServico" class="modal">
+  <div class="modal-content">
+    <h3 style="margin-top:0; color:var(--primary)">Novo Serviço</h3>
+    <label>Nome</label><input type="text" id="sNome">
+    <label>Valor (R$)</label><input type="number" id="sValor">
+    <button class="btn btn-p" onclick="saveService()">Salvar</button>
+    <button class="btn btn-s" onclick="closeModal('modalServico')">Cancelar</button>
+  </div>
+</div>
+
+<div id="modalCliente" class="modal">
+  <div class="modal-content">
+    <h3 style="margin-top:0; color:var(--primary)">Novo Cliente</h3>
+    <label>Nome</label><input type="text" id="cNome">
+    <label>Telefone</label><input type="text" id="cTel">
+    <label>Obs</label><textarea id="cObs"></textarea>
+    <button class="btn btn-p" onclick="saveClient()">Salvar</button>
+    <button class="btn btn-s" onclick="closeModal('modalCliente')">Cancelar</button>
+  </div>
+</div>
+
+<div id="modalBook" class="modal">
+  <div class="modal-content">
+    <h3 style="margin-top:0; color:var(--primary)">Agendar Manualmente</h3>
+    <input type="hidden" id="bRowIndex">
+    <p id="bInfo" style="background:rgba(255,255,255,0.1); padding:10px; border-radius:5px; margin-bottom:15px"></p>
+    <label>Nome da Cliente</label><input type="text" id="bNome">
+    <label>Valor Total (R$)</label><input type="number" id="bValor">
+    <button class="btn btn-p" onclick="adminBook()">Confirmar</button>
+    <button class="btn btn-s" onclick="closeModal('modalBook')">Cancelar</button>
+  </div>
+</div>
+
+<script>
+  // ✅ URL DA API
+  const API = "https://script.google.com/macros/s/AKfycbwXU8sUrcTMOboPswAwPQrBmO7P1ArVnsuvBjf3EsWjRcFY-dJFuOYbaYpxkDKPEpS7/exec";
+
+  async function api(act, p={}) {
+    const res = await fetch(API, { method:"POST", body: JSON.stringify({action:act, ...p}) });
+    const j = await res.json();
+    if(!j.success) throw new Error(j.error);
+    return j.data;
+  }
+
+  // --- INICIALIZAÇÃO ---
+  window.onload = function() {
+    checkConnection();
+    // Força o carregamento do Dashboard imediatamente
+    show('dash'); 
+  };
+
+  function checkConnection() {
+    const st = document.getElementById('connectionStatus');
+    st.style.display = 'block';
+    api('check').then(msg => { st.innerText = msg; st.className = 'status-ok'; })
+    .catch(err => { st.innerText = "Erro: " + err.message; st.className = 'status-err'; });
+  }
+
+  function show(id) {
+    // Esconde todas as views
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    // Remove active dos botões
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    
+    // Ativa view e botão específico
+    document.getElementById(id).classList.add('active');
+    if(id === 'dash') { document.getElementById('btn-dash').classList.add('active'); loadDash(); }
+    if(id === 'agenda') { document.getElementById('btn-agenda').classList.add('active'); loadAgenda(); }
+    if(id === 'servicos') { document.getElementById('btn-servicos').classList.add('active'); loadServices(); }
+    if(id === 'clientes') { document.getElementById('btn-clientes').classList.add('active'); loadClients(); }
+  }
+
+  function openSite() { window.open(API, '_blank'); }
+  function openModal(id) { document.getElementById(id).style.display='flex'; }
+  function closeModal(id) { document.getElementById(id).style.display='none'; }
+
+  // --- DASHBOARD ---
+  let chart=null;
+  function loadDash() {
+    api('getDashboard').then(d => {
+      document.getElementById('kpiHoje').innerText = "R$ " + d.totalHoje.toFixed(2);
+      document.getElementById('kpiMes').innerText = "R$ " + d.totalMes.toFixed(2);
+      
+      const ctx = document.getElementById('chartFin').getContext('2d');
+      if(chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: d.labels, datasets: [{ label: 'Receita', data: d.values, backgroundColor: '#e14eca', borderRadius: 5 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#333' } }, x: { grid: { display: false } } } }
+      });
+    });
+  }
+
+  // --- AGENDA ERP ---
+  function loadAgenda() {
+    const dt = document.getElementById('filterDate').value;
+    document.getElementById('agendaList').innerHTML = '<div style="text-align:center; padding:20px">Carregando dados...</div>';
+    document.getElementById('daySummary').style.display = 'none';
+
+    api('listSlots', {filtroData:dt}).then(l => {
+      let h = '';
+      let count = 0;
+      let revenue = 0;
+
+      if(l.length===0) h='<p style="text-align:center;color:#666">Nenhum horário encontrado.</p>';
+      
+      l.forEach(s => {
+        let isBooked = s.status === 'Agendado';
+        let cardClass = isBooked ? 'booked' : '';
+        let telClean = s.tel ? s.tel.replace(/\D/g,'') : '';
+        
+        if(isBooked) {
+          count++;
+          let val = parseFloat(String(s.valor).replace("R$","").replace(",","."));
+          if(!isNaN(val)) revenue += val;
+        }
+
+        let content = '';
+        let actions = '';
+
+        if(isBooked) {
+          content = `
+            <div class="ag-details">
+              <div class="ag-info-row">👤 <strong>${s.cliente}</strong></div>
+              <div class="ag-info-row">✂️ ${s.servicos}</div>
+              <div class="ag-info-row">📞 ${s.tel}</div>
+              <div class="ag-info-row ag-price">💰 ${s.valor}</div>
+            </div>`;
+          actions = `
+            <a href="https://wa.me/55${telClean}" target="_blank" class="btn-whats">📲 WhatsApp</a>
+            <button class="btn-del" onclick="cancelSlot(${s.rowIndex})">Cancelar</button>`;
+        } else {
+          content = `<div style="color:#666; font-size:0.9rem; margin-bottom:10px">Horário Livre</div>`;
+          actions = `
+            <button class="btn-p" style="padding:5px 10px; font-size:0.8rem" onclick="prepBook(${s.rowIndex}, '${s.hora}')">Reservar Manual</button>
+            <button class="btn-del" style="border:none" onclick="delSlot(${s.rowIndex})">🗑️</button>`;
+        }
+
+        h += `
+          <div class="agenda-item ${cardClass} search-item">
+            <div class="ag-header">
+              <div class="time-badge">${s.hora}</div>
+              <span class="status-tag ${isBooked?'ocup':'disp'}">${s.status}</span>
+            </div>
+            ${content}
+            <div class="ag-actions">${actions}</div>
+            <div style="display:none" class="search-text">${s.cliente} ${s.hora}</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('agendaList').innerHTML = h;
+      
+      if(dt) {
+        document.getElementById('daySummary').style.display = 'flex';
+        document.getElementById('sumCount').innerText = count;
+        document.getElementById('sumTotal').innerText = "R$ " + revenue.toFixed(2);
+      }
+    });
+  }
+
+  function filterList() {
+    let input = document.getElementById('searchClient').value.toLowerCase();
+    let items = document.getElementsByClassName('search-item');
+    for (let i = 0; i < items.length; i++) {
+      let text = items[i].getElementsByClassName('search-text')[0].innerText.toLowerCase();
+      items[i].style.display = text.includes(input) ? "" : "none";
+    }
+  }
+
+  // --- CRUD ---
+  function loadServices() {
+    api('getServices').then(l => {
+      let h = ''; l.forEach(s => {
+        h += `<div class="list-item">
+                <div><strong>${s.nome}</strong> <span style="color:var(--primary)">R$ ${s.valor}</span></div>
+                <button class="btn-del" onclick="delItem('delService', ${s.rowIndex})">🗑️</button>
+              </div>`;
+      });
+      document.getElementById('serviceList').innerHTML = h || '<div style="text-align:center;padding:20px">Vazio</div>';
+    });
+  }
+  function loadClients() {
+    api('getClients').then(l => {
+      let h = ''; l.forEach(c => {
+        h += `<div class="list-item">
+                <div><strong>${c.nome}</strong><br><small>${c.tel}</small></div>
+                <button class="btn-del" onclick="delItem('delClient', ${c.rowIndex})">🗑️</button>
+              </div>`;
+      });
+      document.getElementById('clientList').innerHTML = h || '<div style="text-align:center;padding:20px">Vazio</div>';
+    });
+  }
+
+  function saveService() {
+    const n=document.getElementById('sNome').value; const v=document.getElementById('sValor').value;
+    if(!n) return alert("Preencha!"); api('addService', {nome:n, valor:v}).then(()=>{closeModal('modalServico');loadServices()});
+  }
+  function saveClient() {
+    const n=document.getElementById('cNome').value; const t=document.getElementById('cTel').value; const o=document.getElementById('cObs').value;
+    api('addClient', {nome:n, tel:t, obs:o}).then(()=>{closeModal('modalCliente');loadClients()});
+  }
+  function addManual() {
+    const d=document.getElementById('mData').value; const h=document.getElementById('mHora').value;
+    if(!d || !h) return alert("Preencha!"); api('addSingle', {data:d, hora:h}).then(()=>{alert("Adicionado!");loadAgenda()});
+  }
+  
+  function delSlot(id) { if(confirm("Excluir?")) api('deleteSlot', {id:id}).then(()=>loadAgenda()); }
+  function cancelSlot(id) { if(confirm("Cancelar?")) api('cancel', {id:id}).then(()=>loadAgenda()); }
+  function delItem(act, id) { if(confirm("Excluir?")) api(act, {id:id}).then(()=>{ if(act.includes('Service')) loadServices(); else loadClients(); }); }
+  
+  function prepBook(id, info) { document.getElementById('bRowIndex').value=id; document.getElementById('bInfo').innerText=info; openModal('modalBook'); }
+  function adminBook() {
+    const id=document.getElementById('bRowIndex').value; const n=document.getElementById('bNome').value; const v=document.getElementById('bValor').value;
+    api('book', {rowIndex:id, nome:n, telefone:'Admin', servicos:'Manual', valor:v}).then(()=>{closeModal('modalBook');loadAgenda()});
+  }
+</script>
+</body>
+</html>

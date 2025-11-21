@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camila Silva | Agendamento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #1e1e2f; --bg-card: #27293d; --primary: #e14eca; --text-main: #ffffff; --text-muted: #9a9a9a; --input-bg: #1b1b29; --warning: #ffc107; }
+    * { box-sizing: border-box; transition: all 0.2s ease; }
+    body { font-family: 'Roboto', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 20px; min-height: 100vh; padding-bottom: 120px; }
+    .container { max-width: 500px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+    h1 { font-weight: 300; font-size: 2rem; margin: 0; }
+    h1 strong { font-weight: 700; color: var(--primary); }
+    p.subtitle { color: var(--text-muted); margin: 5px 0 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; }
+
+    /* AVISOS */
+    .notice-box { background: rgba(255, 193, 7, 0.1); border: 1px solid var(--warning); border-radius: 8px; padding: 15px; margin-bottom: 30px; animation: pulse 2s infinite; }
+    .notice-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 0.9rem; color: #ffecb3; line-height: 1.4; }
+    .notice-icon { font-size: 1.1rem; }
+
+    .section-title { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; margin: 25px 0 10px 0; letter-spacing: 1px; border-left: 3px solid var(--primary); padding-left: 10px; }
+    
+    /* SERVIÇOS DINÂMICOS */
+    .service-card { background: var(--bg-card); border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .service-card.selected { border: 1px solid var(--primary); background: rgba(225, 78, 202, 0.1); }
+    .service-card .price { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+
+    .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+    .slot-btn { background: var(--bg-card); border: 1px solid #333; border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer; }
+    .slot-btn strong { display: block; font-size: 1.1rem; }
+    .slot-btn small { font-size: 0.75rem; color: var(--text-muted); }
+    .slot-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+    .slot-btn.selected small { color: #fff; }
+
+    /* RODAPÉ E BOTÕES */
+    .total-bar { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 480px; background: #2c2c3e; border: 1px solid #444; padding: 15px 20px; border-radius: 50px; display: flex; justify-content: space-between; align-items: center; opacity: 0; pointer-events: none; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 800; }
+    .total-bar.visible { opacity: 1; pointer-events: all; bottom: 50px; }
+    .btn-agendar { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 30px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
+    .total-val { font-size: 1.3rem; font-weight: bold; color: white; }
+
+    .fixed-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: #151520; text-align: center; padding: 8px; font-size: 0.7rem; color: #555; border-top: 1px solid #333; z-index: 900; }
+    
+    .social-float { position: fixed; bottom: 50px; right: 15px; display: flex; flex-direction: column; gap: 12px; z-index: 850; }
+    .float-btn { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: transform 0.2s; text-decoration: none; }
+    .float-btn:hover { transform: scale(1.1); }
+    .btn-whats { background: #25D366; }
+    .btn-insta { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); }
+    .float-btn svg { width: 24px; height: 24px; fill: white; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+    .modal-overlay.open { display: flex; animation: fade 0.3s; }
+    .modal-box { background: var(--bg-card); width: 85%; max-width: 350px; padding: 25px; border-radius: 15px; border: 1px solid #444; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+    input { width: 100%; padding: 12px; margin: 8px 0; background: var(--input-bg); border: 1px solid #444; border-radius: 5px; color: white; }
+    
+    #toast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 1100; left: 50%; top: 30px; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 4.5s; }
+    .toast-success { background-color: #4CAF50 !important; }
+    .toast-error { background-color: #F44336 !important; }
+    
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); } }
+    @keyframes fadein { from {top: 0; opacity: 0;} to {top: 30px; opacity: 1;} }
+    @keyframes fadeout { from {top: 30px; opacity: 1;} to {top: 0; opacity: 0;} }
+  </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="container">
+  <header>
+    <h1>Camila <strong>Silva</strong></h1>
+    <p class="subtitle">Sobrancelhas & Beauty</p>
+  </header>
+
+  <div class="notice-box">
+    <div class="notice-item"><span class="notice-icon">⚠️</span><span><strong>Atenção:</strong> Os horários para o final de ano estão acabando! Garanta o seu.</span></div>
+    <div class="notice-item"><span class="notice-icon">💲</span><span><strong>Atualização:</strong> Novos valores vigentes a partir de 21/11.</span></div>
+  </div>
+
+  <div class="section-title">1. Escolha os Serviços</div>
+  <div id="service-loading" style="color:#888; text-align:center; padding:10px">Carregando serviços...</div>
+  <div id="services-list"></div>
+
+  <div class="section-title">2. Selecione o Horário</div>
+  <div id="loading" style="text-align:center; color:var(--primary); padding:20px;"><p>Buscando horários...</p></div>
+  <div id="slots" class="slots-grid"></div>
+</div>
+
+<div class="social-float">
+  <a href="https://www.instagram.com/ca.sobrancelhass" target="_blank" class="float-btn btn-insta" title="Instagram">
+    <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+  </a>
+  <a href="https://wa.me/5511943248016" target="_blank" class="float-btn btn-whats" title="WhatsApp">
+    <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+  </a>
+</div>
+
+<div id="bar" class="total-bar">
+  <div><div style="font-size:0.7rem; color:#ccc">TOTAL</div><div id="totalVal" class="total-val">R$ 0,00</div></div>
+  <button class="btn-agendar" onclick="openModal()">Agendar</button>
+</div>
+
+<div class="fixed-footer">Criado por: Alex Amaral</div>
+
+<div id="modal" class="modal-overlay">
+  <div class="modal-box">
+    <h2 style="margin-top:0; color:var(--primary)">Finalizar</h2>
+    <p style="color:#ccc; font-size:0.9rem">Informe seus dados para confirmar.</p>
+    
+    <input type="text" id="firstName" placeholder="Nome *">
+    <input type="text" id="lastName" placeholder="Sobrenome *">
+    <input type="tel" id="tel" placeholder="WhatsApp (com DDD) *" oninput="mask(this)">
+    
+    <button class="btn-agendar" style="width:100%; margin-top:15px" onclick="send()" id="btnSend">Confirmar Agendamento</button>
+    <div onclick="document.getElementById('modal').classList.remove('open')" style="margin-top:15px; color:#666; cursor:pointer; font-size:0.8rem">Voltar</div>
+  </div>
+</div>
+
+<script>
+  // ✅ URL NOVA AQUI
+  const API_URL = "https://script.google.com/macros/s/AKfycbwk9rTeiefZVO1zhi92DnuPR0JmshelGfoqSemhf0wI5Pi85eQx48l9SuZDqSTXUuRq/exec";
+
+  async function api(act, p = {}) {
+    const res = await fetch(API_URL, { method:"POST", body: JSON.stringify({action:act, ...p}) });
+    const j = await res.json();
+    if(!j.success) throw new Error(j.error);
+    return j.data;
+  }
+
+  let total = 0;
+  let servicos = [];
+  let selectedSlot = null;
+
+  // Inicializa
+  window.onload = () => {
+    loadServices();
+    loadSlots();
+  };
+
+  function loadServices() {
+    api('getServices').then(list => {
+      document.getElementById('service-loading').style.display = 'none';
+      let h = '';
+      list.forEach(s => {
+        h += `<div onclick="toggleService(this, ${s.valor}, '${s.nome}')" class="service-card">
+                <span>${s.nome}</span> <span class="price">R$ ${s.valor}</span>
+              </div>`;
+      });
+      document.getElementById('services-list').innerHTML = h;
+    }).catch(e => console.error("Erro serviços:", e));
+  }
+
+  function loadSlots() {
+    api('clientList').then(data => {
+      document.getElementById('loading').style.display = 'none';
+      const div = document.getElementById('slots');
+      div.innerHTML = '';
+      if(!data || data.length === 0) { div.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666">Nenhum horário disponível.</p>'; return; }
+      
+      data.forEach(s => {
+        const btn = document.createElement('div');
+        btn.className = 'slot-btn';
+        btn.innerHTML = `<strong>${s.hora}</strong><small>${s.data.substr(0,5)}</small>`;
+        btn.onclick = () => {
+          document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedSlot = s;
+          update();
+        };
+        div.appendChild(btn);
+      });
+      showToast("✅ Horários carregados!", "success");
+    }).catch(e => {
+      document.getElementById('loading').innerHTML = "<span style='color:red'>Erro ao conectar.</span>";
+      showToast("❌ Erro: " + e.message, "error");
+    });
+  }
+
+  function toggleService(el, val, name) {
+    el.classList.toggle('selected');
+    if(el.classList.contains('selected')) { total += val; servicos.push(name); } 
+    else { total -= val; servicos = servicos.filter(s => s !== name); }
+    update();
+  }
+
+  function update() {
+    document.getElementById('totalVal').innerText = total.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+    const bar = document.getElementById('bar');
+    if(total > 0 && selectedSlot) bar.classList.add('visible'); else bar.classList.remove('visible');
+  }
+
+  function openModal() { document.getElementById('modal').classList.add('open'); }
+  function mask(o) { let v = o.value.replace(/\D/g,""); v=v.replace(/^(\d{2})(\d)/g,"($1) $2"); v=v.replace(/(\d)(\d{4})$/,"$1-$2"); o.value = v; }
+  function showToast(msg, type) {
+    var x = document.getElementById("toast"); x.innerText = msg; x.className = "show " + (type === 'success' ? 'toast-success' : 'toast-error');
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+  }
+
+  function send() {
+    const fn = document.getElementById('firstName').value.trim();
+    const ln = document.getElementById('lastName').value.trim();
+    const t = document.getElementById('tel').value;
+    if(!fn || !ln || t.length < 14) return showToast("Preencha Nome, Sobrenome e WhatsApp!", "error");
+
+    const btn = document.getElementById('btnSend'); btn.innerText = "Processando..."; btn.disabled = true;
+
+    api('book', {
+      rowIndex: selectedSlot.rowIndex,
+      nome: `${fn} ${ln}`,
+      telefone: t,
+      servicos: servicos.join(', '),
+      valor: document.getElementById('totalVal').innerText
+    }).then(res => {
+      showToast(res, 'success');
+      setTimeout(() => location.reload(), 2000);
+    }).catch(err => {
+      showToast("Erro: " + err.message, 'error');
+      btn.disabled = false; btn.innerText = "Tentar Novamente";
+    });
+  }
+</script>
+</body>
+</html>
