@@ -11,7 +11,7 @@
     * { box-sizing: border-box; }
     body { font-family: 'Roboto', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
     
-    /* STATUS CONEXÃO */
+    /* CONNECTION STATUS */
     #connectionStatus { position: fixed; top: 10px; right: 20px; z-index: 1000; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
     .status-ok { background: rgba(0, 242, 195, 0.2); color: var(--success); border: 1px solid var(--success); }
     .status-err { background: rgba(253, 93, 147, 0.2); color: var(--danger); border: 1px solid var(--danger); }
@@ -31,11 +31,24 @@
     /* CARDS */
     .card { background: var(--card-bg); padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     h1 { margin: 0 0 20px 0; font-weight: 300; }
-    
+    h3 { margin-top: 0; margin-bottom: 15px; color: #ccc; font-size: 1.1rem; }
+
     /* DASHBOARD KPI */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
     .kpi-card { background: linear-gradient(135deg, var(--sidebar), #303040); padding: 20px; border-radius: 12px; border-left: 5px solid var(--primary); }
     .kpi-val { font-size: 2.2rem; font-weight: bold; margin-top: 10px; }
+
+    /* SERVIÇOS GRID */
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .svc-card { background: #252533; border-radius: 12px; padding: 20px; border: 1px solid #3a3a4a; transition: 0.3s; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .svc-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+    .svc-icon { font-size: 2rem; margin-bottom: 10px; background: rgba(255,255,255,0.05); width: 50px; height: 50px; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
+    .svc-price { color: var(--success); font-weight: bold; font-size: 1.3rem; margin-bottom: 10px; }
+
+    /* CLIENTES LIST */
+    .client-row { background: #252533; padding: 15px; border-radius: 10px; border-bottom: 1px solid #3a3a4a; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .client-avatar { width: 40px; height: 40px; background: #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; }
+    .client-info { display: flex; align-items: center; }
 
     /* AGENDA LIST */
     .agenda-item { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #555; }
@@ -90,7 +103,7 @@
 <div class="main">
 
   <div id="dash" class="view active">
-    <h1>Visão Geral Financeira</h1>
+    <h1>Dashboard Financeiro</h1>
     <div class="kpi-grid">
       <div class="kpi-card"><small>Receita Hoje</small><div class="kpi-val" id="kpiHoje">...</div></div>
       <div class="kpi-card" style="border-color:var(--success)"><small>Receita Mês</small><div class="kpi-val" id="kpiMes">...</div></div>
@@ -102,10 +115,10 @@
   </div>
 
   <div id="agenda" class="view">
-    <h1>Agenda de Atendimentos</h1>
+    <h1>Agenda</h1>
     
     <div class="card" style="border:1px solid var(--primary); background: rgba(225, 78, 202, 0.05);">
-      <h3 style="color:var(--primary); margin-top:0">+ Novo Horário na Agenda</h3>
+      <h3 style="color:var(--primary); margin-top:0">+ Novo Horário Manual</h3>
       <div style="display:flex; gap:10px; flex-wrap:wrap">
         <div style="flex:1"><label>Data</label><input type="date" id="mData"></div>
         <div style="flex:1"><label>Hora</label><input type="time" id="mHora"></div>
@@ -115,9 +128,9 @@
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-        <h3 style="margin:0">Gerenciar Horários</h3>
+        <h3 style="margin:0">Lista de Horários</h3>
         <div style="display:flex; gap:10px">
-          <input type="text" id="searchClient" placeholder="🔍 Buscar Cliente..." onkeyup="filterList()" style="margin:0; padding:8px">
+          <input type="text" id="searchClient" placeholder="🔍 Buscar..." onkeyup="filterList()" style="margin:0; padding:8px">
           <input type="date" id="filterDate" onchange="loadAgenda()" style="margin:0; width:auto">
           <button class="btn btn-s" onclick="loadAgenda()">🔄</button>
         </div>
@@ -137,7 +150,9 @@
       <h1>Serviços</h1>
       <button class="btn btn-p" onclick="openModal('modalServico')">+ Novo</button>
     </div>
-    <div class="card" id="serviceList">Carregando...</div>
+    <div class="card" style="background:transparent; box-shadow:none; padding:0;">
+      <div id="serviceList" class="services-grid">Carregando...</div>
+    </div>
   </div>
 
   <div id="clientes" class="view">
@@ -145,7 +160,9 @@
       <h1>Clientes</h1>
       <button class="btn btn-p" onclick="openModal('modalCliente')">+ Novo</button>
     </div>
-    <div class="card" id="clientList">Carregando...</div>
+    <div class="card">
+      <div id="clientList">Carregando...</div>
+    </div>
   </div>
 
 </div>
@@ -184,10 +201,13 @@
 </div>
 
 <script>
-  // ✅ URL DA API
+  // ✅ URL DA API (BACKEND GOOGLE APPS SCRIPT)
   const API = "https://script.google.com/macros/s/AKfycbwXU8sUrcTMOboPswAwPQrBmO7P1ArVnsuvBjf3EsWjRcFY-dJFuOYbaYpxkDKPEpS7/exec";
 
-  async function api(act, p={}) {
+  // ✅ URL DO SITE DO CLIENTE (GITHUB PAGES)
+  const CLIENT_SITE_URL = "https://alexamaralf.github.io/camilasilva/";
+
+  async function req(act, p={}) {
     const res = await fetch(API, { method:"POST", body: JSON.stringify({action:act, ...p}) });
     const j = await res.json();
     if(!j.success) throw new Error(j.error);
@@ -204,32 +224,36 @@
   function checkConnection() {
     const st = document.getElementById('connectionStatus');
     st.style.display = 'block';
-    api('check').then(msg => { st.innerText = msg; st.className = 'status-ok'; })
+    req('check').then(msg => { st.innerText = msg; st.className = 'status-ok'; })
     .catch(err => { st.innerText = "Erro: " + err.message; st.className = 'status-err'; });
   }
 
   function show(id) {
-    // Esconde todas as views
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    // Remove active dos botões
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     
-    // Ativa view e botão específico
     document.getElementById(id).classList.add('active');
-    if(id === 'dash') { document.getElementById('btn-dash').classList.add('active'); loadDash(); }
-    if(id === 'agenda') { document.getElementById('btn-agenda').classList.add('active'); loadAgenda(); }
-    if(id === 'servicos') { document.getElementById('btn-servicos').classList.add('active'); loadServices(); }
-    if(id === 'clientes') { document.getElementById('btn-clientes').classList.add('active'); loadClients(); }
+    // Adiciona classe active ao botão (mesmo se chamado via código)
+    const btn = document.getElementById('btn-' + id);
+    if(btn) btn.classList.add('active');
+
+    if(id==='dash') loadDash();
+    if(id==='agenda') loadAgenda();
+    if(id==='servicos') loadServices();
+    if(id==='clientes') loadClients();
   }
 
-  function openSite() { window.open(API, '_blank'); }
+  function openSite() { 
+    window.open(CLIENT_SITE_URL, '_blank'); 
+  }
+  
   function openModal(id) { document.getElementById(id).style.display='flex'; }
   function closeModal(id) { document.getElementById(id).style.display='none'; }
 
   // --- DASHBOARD ---
   let chart=null;
   function loadDash() {
-    api('getDashboard').then(d => {
+    req('getDashboard').then(d => {
       document.getElementById('kpiHoje').innerText = "R$ " + d.totalHoje.toFixed(2);
       document.getElementById('kpiMes').innerText = "R$ " + d.totalMes.toFixed(2);
       
@@ -249,7 +273,7 @@
     document.getElementById('agendaList').innerHTML = '<div style="text-align:center; padding:20px">Carregando dados...</div>';
     document.getElementById('daySummary').style.display = 'none';
 
-    api('listSlots', {filtroData:dt}).then(l => {
+    req('listSlots', {filtroData:dt}).then(l => {
       let h = '';
       let count = 0;
       let revenue = 0;
@@ -258,9 +282,6 @@
       
       l.forEach(s => {
         let isBooked = s.status === 'Agendado';
-        let cardClass = isBooked ? 'booked' : '';
-        let telClean = s.tel ? s.tel.replace(/\D/g,'') : '';
-        
         if(isBooked) {
           count++;
           let val = parseFloat(String(s.valor).replace("R$","").replace(",","."));
@@ -271,12 +292,13 @@
         let actions = '';
 
         if(isBooked) {
+          let telClean = s.tel ? s.tel.replace(/\D/g,'') : '';
           content = `
             <div class="ag-details">
-              <div class="ag-info-row">👤 <strong>${s.cliente}</strong></div>
-              <div class="ag-info-row">✂️ ${s.servicos}</div>
-              <div class="ag-info-row">📞 ${s.tel}</div>
-              <div class="ag-info-row ag-price">💰 ${s.valor}</div>
+              <div style="color:white">👤 <strong>${s.cliente}</strong></div>
+              <div>✂️ ${s.servicos}</div>
+              <div>📞 ${s.tel}</div>
+              <div class="ag-price">💰 ${s.valor}</div>
             </div>`;
           actions = `
             <a href="https://wa.me/55${telClean}" target="_blank" class="btn-whats">📲 WhatsApp</a>
@@ -285,11 +307,11 @@
           content = `<div style="color:#666; font-size:0.9rem; margin-bottom:10px">Horário Livre</div>`;
           actions = `
             <button class="btn-p" style="padding:5px 10px; font-size:0.8rem" onclick="prepBook(${s.rowIndex}, '${s.hora}')">Reservar Manual</button>
-            <button class="btn-del" style="border:none" onclick="delSlot(${s.rowIndex})">🗑️</button>`;
+            <button class="btn-del" style="border:none; background:none; font-size:1.2rem" onclick="delSlot(${s.rowIndex})">🗑️</button>`;
         }
 
         h += `
-          <div class="agenda-item ${cardClass} search-item">
+          <div class="agenda-item ${isBooked ? 'booked' : ''} search-item">
             <div class="ag-header">
               <div class="time-badge">${s.hora}</div>
               <span class="status-tag ${isBooked?'ocup':'disp'}">${s.status}</span>
@@ -297,8 +319,7 @@
             ${content}
             <div class="ag-actions">${actions}</div>
             <div style="display:none" class="search-text">${s.cliente} ${s.hora}</div>
-          </div>
-        `;
+          </div>`;
       });
 
       document.getElementById('agendaList').innerHTML = h;
@@ -320,51 +341,67 @@
     }
   }
 
-  // --- CRUD ---
+  // --- LISTAS NOVAS (GRID E AVATAR) ---
   function loadServices() {
-    api('getServices').then(l => {
-      let h = ''; l.forEach(s => {
-        h += `<div class="list-item">
-                <div><strong>${s.nome}</strong> <span style="color:var(--primary)">R$ ${s.valor}</span></div>
-                <button class="btn-del" onclick="delItem('delService', ${s.rowIndex})">🗑️</button>
-              </div>`;
+    req('getServices').then(l => {
+      let h = '';
+      l.forEach(s => {
+        h += `
+          <div class="svc-card">
+            <div class="svc-icon">💅</div>
+            <div style="font-weight:bold; margin-bottom:5px">${s.nome}</div>
+            <div class="svc-price">R$ ${s.valor}</div>
+            <button class="btn-del" style="margin-top:10px; font-size:0.8rem" onclick="delItem('delService', ${s.rowIndex})">Excluir</button>
+          </div>`;
       });
-      document.getElementById('serviceList').innerHTML = h || '<div style="text-align:center;padding:20px">Vazio</div>';
-    });
-  }
-  function loadClients() {
-    api('getClients').then(l => {
-      let h = ''; l.forEach(c => {
-        h += `<div class="list-item">
-                <div><strong>${c.nome}</strong><br><small>${c.tel}</small></div>
-                <button class="btn-del" onclick="delItem('delClient', ${c.rowIndex})">🗑️</button>
-              </div>`;
-      });
-      document.getElementById('clientList').innerHTML = h || '<div style="text-align:center;padding:20px">Vazio</div>';
+      document.getElementById('serviceList').innerHTML = h || '<p style="grid-column:1/-1;text-align:center;color:#666">Vazio</p>';
     });
   }
 
+  function loadClients() {
+    req('getClients').then(l => {
+      let h = '';
+      l.forEach(c => {
+        let ini = c.nome ? c.nome.substring(0,2).toUpperCase() : '??';
+        h += `
+          <div class="client-row">
+            <div class="client-info">
+              <div class="client-avatar">${ini}</div>
+              <div>
+                <div style="font-weight:bold">${c.nome}</div>
+                <div style="font-size:0.85rem; color:#aaa">${c.tel}</div>
+                ${c.obs ? `<div style="font-size:0.8rem; color:#777; font-style:italic">${c.obs}</div>` : ''}
+              </div>
+            </div>
+            <button class="btn-del" onclick="delItem('delClient', ${c.rowIndex})">Excluir</button>
+          </div>`;
+      });
+      document.getElementById('clientList').innerHTML = h || '<p style="text-align:center;color:#666">Vazio</p>';
+    });
+  }
+
+  // --- SALVAR E AÇÕES ---
   function saveService() {
     const n=document.getElementById('sNome').value; const v=document.getElementById('sValor').value;
-    if(!n) return alert("Preencha!"); api('addService', {nome:n, valor:v}).then(()=>{closeModal('modalServico');loadServices()});
+    if(!n) return alert("Preencha!"); req('addService', {nome:n, valor:v}).then(()=>{closeModal('modalServico');loadServices()});
   }
   function saveClient() {
     const n=document.getElementById('cNome').value; const t=document.getElementById('cTel').value; const o=document.getElementById('cObs').value;
-    api('addClient', {nome:n, tel:t, obs:o}).then(()=>{closeModal('modalCliente');loadClients()});
+    req('addClient', {nome:n, tel:t, obs:o}).then(()=>{closeModal('modalCliente');loadClients()});
   }
   function addManual() {
     const d=document.getElementById('mData').value; const h=document.getElementById('mHora').value;
-    if(!d || !h) return alert("Preencha!"); api('addSingle', {data:d, hora:h}).then(()=>{alert("Adicionado!");loadAgenda()});
+    if(!d || !h) return alert("Preencha!"); req('addSingle', {data:d, hora:h}).then(()=>{alert("Adicionado!");loadAgenda()});
   }
   
-  function delSlot(id) { if(confirm("Excluir?")) api('deleteSlot', {id:id}).then(()=>loadAgenda()); }
-  function cancelSlot(id) { if(confirm("Cancelar?")) api('cancel', {id:id}).then(()=>loadAgenda()); }
-  function delItem(act, id) { if(confirm("Excluir?")) api(act, {id:id}).then(()=>{ if(act.includes('Service')) loadServices(); else loadClients(); }); }
+  function delSlot(id) { if(confirm("Excluir?")) req('deleteSlot', {id:id}).then(()=>loadAgenda()); }
+  function cancelSlot(id) { if(confirm("Cancelar?")) req('cancel', {id:id}).then(()=>loadAgenda()); }
+  function delItem(act, id) { if(confirm("Excluir?")) req(act, {id:id}).then(()=> { if(act=='delService') loadServices(); else loadClients(); }); }
   
-  function prepBook(id, info) { document.getElementById('bRowIndex').value=id; document.getElementById('bInfo').innerText=info; openModal('modalBook'); }
+  function prepBook(id, info) { document.getElementById('bRowIndex').value=id; document.getElementById('bInfo').innerText="Reservando horário: "+info; openModal('modalBook'); }
   function adminBook() {
     const id=document.getElementById('bRowIndex').value; const n=document.getElementById('bNome').value; const v=document.getElementById('bValor').value;
-    api('book', {rowIndex:id, nome:n, telefone:'Admin', servicos:'Manual', valor:v}).then(()=>{closeModal('modalBook');loadAgenda()});
+    req('book', {rowIndex:id, nome:n, telefone:'Admin', servicos:'Manual', valor:v}).then(()=>{closeModal('modalBook');loadAgenda()});
   }
 </script>
 </body>
