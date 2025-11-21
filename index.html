@@ -23,17 +23,31 @@
 
     .section-title { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; margin: 25px 0 10px 0; letter-spacing: 1px; border-left: 3px solid var(--primary); padding-left: 10px; }
     
-    /* SERVIÇOS DINÂMICOS */
+    /* SERVIÇOS */
     .service-card { background: var(--bg-card); border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
     .service-card.selected { border: 1px solid var(--primary); background: rgba(225, 78, 202, 0.1); }
     .service-card .price { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
 
+    /* HORÁRIOS */
     .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
     .slot-btn { background: var(--bg-card); border: 1px solid #333; border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer; }
     .slot-btn strong { display: block; font-size: 1.1rem; }
     .slot-btn small { font-size: 0.75rem; color: var(--text-muted); }
     .slot-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
     .slot-btn.selected small { color: #fff; }
+
+    /* INSTAGRAM SLIDER */
+    .insta-section { margin-top: 40px; margin-bottom: 20px; }
+    .slider-container { position: relative; width: 100%; overflow: hidden; border-radius: 12px; height: 300px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+    .slider-track { display: flex; transition: transform 0.5s ease-in-out; height: 100%; }
+    .slide { min-width: 100%; height: 100%; position: relative; }
+    .slide img { width: 100%; height: 100%; object-fit: cover; }
+    .slide-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 20px; color: white; text-align: center; }
+    
+    /* Navegação Slider */
+    .slider-dots { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+    .dot { width: 8px; height: 8px; background: #555; border-radius: 50%; cursor: pointer; transition: 0.3s; }
+    .dot.active { background: var(--primary); transform: scale(1.2); }
 
     /* RODAPÉ E BOTÕES */
     .total-bar { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 480px; background: #2c2c3e; border: 1px solid #444; padding: 15px 20px; border-radius: 50px; display: flex; justify-content: space-between; align-items: center; opacity: 0; pointer-events: none; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 800; }
@@ -88,6 +102,16 @@
   <div class="section-title">2. Selecione o Horário</div>
   <div id="loading" style="text-align:center; color:var(--primary); padding:20px;"><p>Buscando horários...</p></div>
   <div id="slots" class="slots-grid"></div>
+
+  <div class="section-title">Siga no Instagram</div>
+  <div class="insta-section">
+    <div class="slider-container">
+      <div class="slider-track" id="track">
+        </div>
+    </div>
+    <div class="slider-dots" id="dots"></div>
+  </div>
+
 </div>
 
 <div class="social-float">
@@ -131,6 +155,14 @@
     return j.data;
   }
 
+  // --- DADOS DO INSTAGRAM (SIMULADOS) ---
+  // Substitua os links abaixo pelos links reais das imagens do Instagram
+  const instaImages = [
+    "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop", // Exemplo 1
+    "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=800&auto=format&fit=crop", // Exemplo 2
+    "https://images.unsplash.com/photo-1588006173599-2ca0123623cd?q=80&w=800&auto=format&fit=crop"  // Exemplo 3
+  ];
+
   let total = 0;
   let servicos = [];
   let selectedSlot = null;
@@ -139,8 +171,50 @@
   window.onload = () => {
     loadServices();
     loadSlots();
+    initSlider();
   };
 
+  // --- SLIDER LOGIC ---
+  function initSlider() {
+    const track = document.getElementById('track');
+    const dotsContainer = document.getElementById('dots');
+    
+    // Cria slides
+    instaImages.forEach((img, i) => {
+      // Slide
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+      slide.innerHTML = `<img src="${img}"><div class="slide-overlay">@ca.sobrancelhass</div>`;
+      track.appendChild(slide);
+      
+      // Dot
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i===0 ? ' active' : '');
+      dot.onclick = () => goToSlide(i);
+      dotsContainer.appendChild(dot);
+    });
+
+    // Auto Play
+    setInterval(nextSlide, 4000);
+  }
+
+  let currentSlide = 0;
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % instaImages.length;
+    updateSlider();
+  }
+  function goToSlide(n) {
+    currentSlide = n;
+    updateSlider();
+  }
+  function updateSlider() {
+    document.getElementById('track').style.transform = `translateX(-${currentSlide * 100}%)`;
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach(d => d.classList.remove('active'));
+    dots[currentSlide].classList.add('active');
+  }
+
+  // --- CARREGAMENTOS ---
   function loadServices() {
     api('getServices').then(list => {
       document.getElementById('service-loading').style.display = 'none';
