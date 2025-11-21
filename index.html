@@ -23,12 +23,11 @@
 
     .section-title { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; margin: 25px 0 10px 0; letter-spacing: 1px; border-left: 3px solid var(--primary); padding-left: 10px; }
     
-    /* SERVIÇOS */
+    /* SERVIÇOS DINÂMICOS */
     .service-card { background: var(--bg-card); border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
     .service-card.selected { border: 1px solid var(--primary); background: rgba(225, 78, 202, 0.1); }
     .service-card .price { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
 
-    /* HORÁRIOS */
     .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
     .slot-btn { background: var(--bg-card); border: 1px solid #333; border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer; }
     .slot-btn strong { display: block; font-size: 1.1rem; }
@@ -106,8 +105,7 @@
   <div class="section-title">Siga no Instagram</div>
   <div class="insta-section">
     <div class="slider-container">
-      <div class="slider-track" id="track">
-        </div>
+      <div class="slider-track" id="track"></div>
     </div>
     <div class="slider-dots" id="dots"></div>
   </div>
@@ -145,8 +143,8 @@
 </div>
 
 <script>
-  // ✅ URL NOVA AQUI
-  const API_URL = "https://script.google.com/macros/s/AKfycbwk9rTeiefZVO1zhi92DnuPR0JmshelGfoqSemhf0wI5Pi85eQx48l9SuZDqSTXUuRq/exec";
+  // ✅ URL NOVA DA IMPLANTAÇÃO
+  const API_URL = "https://script.google.com/macros/s/AKfycbwXU8sUrcTMOboPswAwPQrBmO7P1ArVnsuvBjf3EsWjRcFY-dJFuOYbaYpxkDKPEpS7/exec";
 
   async function api(act, p = {}) {
     const res = await fetch(API_URL, { method:"POST", body: JSON.stringify({action:act, ...p}) });
@@ -155,12 +153,11 @@
     return j.data;
   }
 
-  // --- DADOS DO INSTAGRAM (SIMULADOS) ---
-  // Substitua os links abaixo pelos links reais das imagens do Instagram
+  // --- SLIDER FOTOS ---
   const instaImages = [
-    "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop", // Exemplo 1
-    "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=800&auto=format&fit=crop", // Exemplo 2
-    "https://images.unsplash.com/photo-1588006173599-2ca0123623cd?q=80&w=800&auto=format&fit=crop"  // Exemplo 3
+    "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop", 
+    "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=800&auto=format&fit=crop", 
+    "https://images.unsplash.com/photo-1588006173599-2ca0123623cd?q=80&w=800&auto=format&fit=crop"  
   ];
 
   let total = 0;
@@ -178,23 +175,20 @@
   function initSlider() {
     const track = document.getElementById('track');
     const dotsContainer = document.getElementById('dots');
-    
-    // Cria slides
+    if(!track) return;
+
     instaImages.forEach((img, i) => {
-      // Slide
       const slide = document.createElement('div');
       slide.className = 'slide';
       slide.innerHTML = `<img src="${img}"><div class="slide-overlay">@ca.sobrancelhass</div>`;
       track.appendChild(slide);
       
-      // Dot
       const dot = document.createElement('div');
       dot.className = 'dot' + (i===0 ? ' active' : '');
       dot.onclick = () => goToSlide(i);
       dotsContainer.appendChild(dot);
     });
 
-    // Auto Play
     setInterval(nextSlide, 4000);
   }
 
@@ -233,7 +227,7 @@
       document.getElementById('loading').style.display = 'none';
       const div = document.getElementById('slots');
       div.innerHTML = '';
-      if(!data || data.length === 0) { div.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666">Nenhum horário disponível.</p>'; return; }
+      if(!data || data.length === 0) { div.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666">Nenhum horário disponível no momento.</p>'; return; }
       
       data.forEach(s => {
         const btn = document.createElement('div');
