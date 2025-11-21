@@ -35,7 +35,7 @@
     .slot-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
     .slot-btn.selected small { color: #fff; }
 
-    /* INSTAGRAM SLIDER */
+    /* SLIDER */
     .insta-section { margin-top: 40px; margin-bottom: 20px; }
     .slider-container { position: relative; width: 100%; overflow: hidden; border-radius: 12px; height: 300px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
     .slider-track { display: flex; transition: transform 0.5s ease-in-out; height: 100%; }
@@ -62,11 +62,22 @@
     .float-btn svg { width: 24px; height: 24px; fill: white; }
 
     /* MODAL */
-    .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+    .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
     .modal-overlay.open { display: flex; animation: fade 0.3s; }
     .modal-box { background: var(--bg-card); width: 85%; max-width: 350px; padding: 25px; border-radius: 15px; border: 1px solid #444; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
     input { width: 100%; padding: 12px; margin: 8px 0; background: var(--input-bg); border: 1px solid #444; border-radius: 5px; color: white; }
     
+    /* BOTÕES DE AGENDA */
+    .calendar-grid { display: grid; gap: 10px; margin-top: 15px; margin-bottom: 20px; }
+    .btn-cal { color: white; padding: 12px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; font-size: 0.9rem; transition: 0.2s; }
+    .btn-cal:hover { filter: brightness(1.1); transform: translateY(-2px); }
+    
+    .btn-google { background: #4285F4; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3); }
+    .btn-outlook { background: #0078D4; box-shadow: 0 4px 10px rgba(0, 120, 212, 0.3); }
+    .btn-apple { background: #333; box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1); border: 1px solid #555; }
+
+    .btn-close { background: transparent; border: 1px solid #666; color: #ccc; padding: 10px; width: 100%; border-radius: 30px; cursor: pointer; }
+
     #toast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 1100; left: 50%; top: 30px; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
     #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 4.5s; }
     .toast-success { background-color: #4CAF50 !important; }
@@ -102,21 +113,14 @@
 
   <div class="section-title">Siga no Instagram</div>
   <div class="insta-section">
-    <div class="slider-container">
-      <div class="slider-track" id="track"></div>
-    </div>
+    <div class="slider-container"><div class="slider-track" id="track"></div></div>
     <div class="slider-dots" id="dots"></div>
   </div>
-
 </div>
 
 <div class="social-float">
-  <a href="https://www.instagram.com/ca.sobrancelhass" target="_blank" class="float-btn btn-insta" title="Instagram">
-    <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-  </a>
-  <a href="https://wa.me/5511943248016" target="_blank" class="float-btn btn-whats" title="WhatsApp">
-    <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-  </a>
+  <a href="https://www.instagram.com/ca.sobrancelhass" target="_blank" class="float-btn btn-insta" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+  <a href="https://wa.me/5511943248016" target="_blank" class="float-btn btn-whats" title="WhatsApp"><svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg></a>
 </div>
 
 <div id="bar" class="total-bar">
@@ -130,18 +134,39 @@
   <div class="modal-box">
     <h2 style="margin-top:0; color:var(--primary)">Finalizar</h2>
     <p style="color:#ccc; font-size:0.9rem">Informe seus dados para confirmar.</p>
-    
     <input type="text" id="firstName" placeholder="Nome *">
     <input type="text" id="lastName" placeholder="Sobrenome *">
     <input type="tel" id="tel" placeholder="WhatsApp (com DDD) *" oninput="mask(this)">
-    
     <button class="btn-agendar" style="width:100%; margin-top:15px" onclick="send()" id="btnSend">Confirmar Agendamento</button>
     <div onclick="document.getElementById('modal').classList.remove('open')" style="margin-top:15px; color:#666; cursor:pointer; font-size:0.8rem">Voltar</div>
   </div>
 </div>
 
+<div id="modalSuccess" class="modal-overlay">
+  <div class="modal-box" style="background: #2e2e40; border: 2px solid var(--success);">
+    <h2 style="margin-top:0; color:var(--success)">Agendado! 🎉</h2>
+    <p style="color:#fff; margin-bottom:20px">Seu horário foi reservado. Não esqueça!</p>
+    
+    <p style="font-size:0.9rem; color:#aaa; margin-bottom:10px">Adicionar lembrete:</p>
+    
+    <div class="calendar-grid">
+      <a id="btnGoogle" href="#" target="_blank" class="btn-cal btn-google">
+        📅 Google Agenda
+      </a>
+      <a id="btnOutlook" href="#" target="_blank" class="btn-cal btn-outlook">
+        📧 Outlook
+      </a>
+      <a id="btnApple" href="#" download="agendamento.ics" class="btn-cal btn-apple">
+        🍏 Apple / iCal
+      </a>
+    </div>
+    
+    <button class="btn-close" onclick="location.reload()">Fechar</button>
+  </div>
+</div>
+
 <script>
-  // ✅ URL NOVA AQUI
+  // ✅ URL DE IMPLANTAÇÃO
   const API_URL = "https://script.google.com/macros/s/AKfycbw5dJYF56NDJBLvyEPrVLY2gR4twbJ8F_aYHkJM4r-y9dbQHI2THbpIuzQKcNhidDXj/exec";
 
   async function api(act, p = {}) {
@@ -151,7 +176,6 @@
     return j.data;
   }
 
-  // --- FOTOS SOBRANCELHAS ---
   const instaImages = [
     "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop", 
     "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=800&auto=format&fit=crop", 
@@ -162,50 +186,38 @@
   let servicos = [];
   let selectedSlot = null;
 
-  // Inicializa
   window.onload = () => {
     loadServices();
     loadSlots();
     initSlider();
   };
 
-  // --- SLIDER LOGIC ---
   function initSlider() {
     const track = document.getElementById('track');
     const dotsContainer = document.getElementById('dots');
-    
+    if(!track) return;
     instaImages.forEach((img, i) => {
       const slide = document.createElement('div');
       slide.className = 'slide';
       slide.innerHTML = `<img src="${img}"><div class="slide-overlay">@ca.sobrancelhass</div>`;
       track.appendChild(slide);
-      
       const dot = document.createElement('div');
       dot.className = 'dot' + (i===0 ? ' active' : '');
       dot.onclick = () => goToSlide(i);
       dotsContainer.appendChild(dot);
     });
-
     setInterval(nextSlide, 4000);
   }
 
   let currentSlide = 0;
-  function nextSlide() {
-    currentSlide = (currentSlide + 1) % instaImages.length;
-    updateSlider();
-  }
-  function goToSlide(n) {
-    currentSlide = n;
-    updateSlider();
-  }
+  function nextSlide() { currentSlide = (currentSlide + 1) % instaImages.length; updateSlider(); }
+  function goToSlide(n) { currentSlide = n; updateSlider(); }
   function updateSlider() {
     document.getElementById('track').style.transform = `translateX(-${currentSlide * 100}%)`;
-    const dots = document.querySelectorAll('.dot');
-    dots.forEach(d => d.classList.remove('active'));
-    dots[currentSlide].classList.add('active');
+    document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.dot')[currentSlide].classList.add('active');
   }
 
-  // --- CARREGAMENTOS ---
   function loadServices() {
     api('getServices').then(list => {
       document.getElementById('service-loading').style.display = 'none';
@@ -224,7 +236,7 @@
       document.getElementById('loading').style.display = 'none';
       const div = document.getElementById('slots');
       div.innerHTML = '';
-      if(!data || data.length === 0) { div.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666">Nenhum horário disponível no momento.</p>'; return; }
+      if(!data || data.length === 0) { div.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666">Nenhum horário disponível.</p>'; return; }
       
       data.forEach(s => {
         const btn = document.createElement('div');
@@ -280,12 +292,53 @@
       servicos: servicos.join(', '),
       valor: document.getElementById('totalVal').innerText
     }).then(res => {
-      showToast(res, 'success');
-      setTimeout(() => location.reload(), 2000);
+      // GERA LINKS
+      setupCalendarLinks();
+      document.getElementById('modal').classList.remove('open');
+      document.getElementById('modalSuccess').classList.add('open');
     }).catch(err => {
       showToast("Erro: " + err.message, 'error');
       btn.disabled = false; btn.innerText = "Tentar Novamente";
     });
+  }
+
+  function setupCalendarLinks() {
+    // Parse da Data DD/MM/YYYY e Hora HH:mm
+    const dParts = selectedSlot.data.split('/');
+    const hParts = selectedSlot.hora.split(':');
+    const start = new Date(dParts[2], dParts[1]-1, dParts[0], hParts[0], hParts[1]);
+    const end = new Date(start.getTime() + 60*60000); // +1 hora
+
+    const title = "Sobrancelhas com Camila Silva";
+    const details = "Serviços: " + servicos.join(', ');
+    const location = "Espaço Camila Silva";
+
+    // 1. Google
+    const fmtG = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g,"");
+    const gLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${fmtG(start)}/${fmtG(end)}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}`;
+    document.getElementById('btnGoogle').href = gLink;
+
+    // 2. Outlook
+    const fmtO = (d) => d.toISOString();
+    const oLink = `https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&startdt=${fmtO(start)}&enddt=${fmtO(end)}&subject=${encodeURIComponent(title)}&body=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}`;
+    document.getElementById('btnOutlook').href = oLink;
+
+    // 3. iCal (Apple/Download)
+    const fmtI = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g,"");
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+URL:${document.URL}
+DTSTART:${fmtI(start)}
+DTEND:${fmtI(end)}
+SUMMARY:${title}
+DESCRIPTION:${details}
+LOCATION:${location}
+END:VEVENT
+END:VCALENDAR`;
+    
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    document.getElementById('btnApple').href = URL.createObjectURL(blob);
   }
 </script>
 </body>
