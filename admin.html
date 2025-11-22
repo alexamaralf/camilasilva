@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin ERP Pro | Camila Silva</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root { 
@@ -128,11 +129,11 @@
 <body>
 
 <div class="overlay" id="menuOverlay" onclick="toggleMenu()"></div>
-<button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+<button class="mobile-menu-btn" onclick="toggleMenu()" title="Menu"><i class="fas fa-bars"></i></button>
 
 <div id="loginOverlay">
   <div class="login-box">
-    <h2>🔒 Acesso Restrito</h2>
+    <h2><i class="fas fa-lock"></i> Acesso Restrito</h2>
     <p style="color:#ccc; margin-bottom:20px">Digite a senha de administrador</p>
     <input type="password" id="adminPass" placeholder="Senha">
     <button onclick="doLogin()">ENTRAR</button>
@@ -142,16 +143,42 @@
 <div id="connectionStatus">Verificando...</div>
 
 <div class="sidebar" id="sidebar">
-  <div class="logo">Camila ERP</div>
-  <button id="btn-dash" class="nav-btn active" onclick="show('dash')">📊 Dashboard</button>
-  <button id="btn-agenda" class="nav-btn" onclick="show('agenda')">📅 Agenda</button>
-  <button id="btn-servicos" class="nav-btn" onclick="show('servicos')">💅 Serviços</button>
-  <button id="btn-clientes" class="nav-btn" onclick="show('clientes')">👥 Clientes</button>
+  <div class="logo"><i class="fas fa-gem"></i> Camila ERP</div>
+  <button id="btn-dash" class="nav-btn active" onclick="show('dash')" title="Dashboard"><i class="fas fa-chart-bar"></i> Dashboard</button>
+  <button id="btn-agenda" class="nav-btn" onclick="show('agenda')" title="Agenda"><i class="fas fa-calendar-alt"></i> Agenda</button>
+  <button id="btn-servicos" class="nav-btn" onclick="show('servicos')" title="Serviços"><i class="fas fa-spa"></i> Serviços</button>
+  <button id="btn-clientes" class="nav-btn" onclick="show('clientes')" title="Clientes"><i class="fas fa-users"></i> Clientes</button>
+  <button id="btn-colabs" class="nav-btn" onclick="show('colabs')" title="Colaboradores"><i class="fas fa-user-tie"></i> Colaboradores</button>
   <div style="flex:1"></div>
-  <button class="nav-btn" onclick="openSite()">🌐 Ver Site Cliente</button>
+  <button class="nav-btn" onclick="openSite()" title="Ver Site Cliente"><i class="fas fa-globe"></i> Ver Site Cliente</button>
 </div>
 
 <div class="main">
+  <div id="colabs" class="view">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+      <h1>Colaboradores</h1>
+      <button class="btn btn-p" onclick="openModal('modalColab')"><i class="fas fa-plus"></i> Novo</button>
+    </div>
+    <div class="card" style="background:transparent; padding:0; box-shadow:none;">
+      <div id="colabList" class="services-grid">Carregando...</div>
+    </div>
+    <div class="card">
+      <h3>Gorjetas por Colaborador</h3>
+      <div id="colabTips" class="client-list-container">Carregando...</div>
+    </div>
+  </div>
+<div id="modalColab" class="modal">
+  <div class="modal-content">
+    <h3 id="titleColab">Colaborador</h3>
+    <input type="hidden" id="colabRowIndex">
+    <label>Nome</label><input type="text" id="colabNome">
+    <label>Cargo</label><input type="text" id="colabCargo">
+    <div style="text-align:right; margin-top:10px">
+      <button class="btn btn-s" onclick="closeModal('modalColab')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveColab()">Salvar</button>
+    </div>
+  </div>
+</div>
 
   <div id="dash" class="view active">
     <h1>Dashboard Financeiro</h1>
@@ -254,8 +281,46 @@
 </div>
 
 <script>
+    // --- Colaboradores ---
+    function loadColabs() {
+      req('getColabs').then(list => {
+        let h = '';
+        list.forEach(c => {
+          h += `<div class="svc-card">
+            <div class="svc-icon"><i class="fas fa-user-tie"></i></div>
+            <div class="svc-name">${c.nome}</div>
+            <div class="svc-price">${c.cargo || ''}</div>
+            <div class="svc-actions">
+              <button class="btn-edit" onclick="openEditColab(${c.rowIndex}, '${c.nome.replace(/'/g, '\'')}', '${c.cargo ? c.cargo.replace(/'/g, '\'') : ''}')" title="Editar"><i class="fas fa-pen"></i></button>
+            </div>
+          </div>`;
+        });
+        document.getElementById('colabList').innerHTML = h || '<div style="text-align:center;padding:20px">Nenhum colaborador cadastrado.</div>';
+        document.getElementById('colabTips').innerHTML = list.map(c => `
+          <div class="client-row"><div class="client-info"><div class="client-avatar"><i class="fas fa-user-tie"></i></div><div><div style="font-weight:bold; color:white">${c.nome}</div></div></div><div class="client-actions"><span style="color:var(--success);font-weight:bold">R$ 0,00</span></div></div>
+        `).join('');
+      });
+    }
+
+    function openEditColab(row, nome, cargo) {
+      document.getElementById('colabRowIndex').value = row || '';
+      document.getElementById('colabNome').value = nome || '';
+      document.getElementById('colabCargo').value = cargo || '';
+      document.getElementById('titleColab').innerText = row ? "Editar Colaborador" : "Novo Colaborador";
+      document.getElementById('modalColab').style.display = 'flex';
+    }
+    function saveColab() {
+      const row = document.getElementById('colabRowIndex').value;
+      const nome = document.getElementById('colabNome').value;
+      const cargo = document.getElementById('colabCargo').value;
+      const action = row ? 'editColab' : 'addColab';
+      req(action, {rowIndex:row, nome:nome, cargo:cargo}).then(() => {
+        closeModal('modalColab');
+        loadColabs();
+      });
+    }
   // ✅ URL ATUALIZADA
-  const API = "https://script.google.com/macros/s/AKfycbw5dJYF56NDJBLvyEPrVLY2gR4twbJ8F_aYHkJM4r-y9dbQHI2THbpIuzQKcNhidDXj/exec";
+  const API = "https://script.google.com/macros/s/AKfycbyK0PsPP_t4fYTBB3TS1B_2ECTXpqTOr4ZsUbRRJv9MtDhL3I4h9Qkj9Z1rHyXJk8Fj/exec";
   let TOKEN = "";
 
   function toggleMenu() {
@@ -297,6 +362,7 @@
     if(id==='agenda') loadAgenda();
     if(id==='servicos') loadServices();
     if(id==='clientes') loadClients();
+    if(id==='colabs') loadColabs();
   }
 
   function openSite() { window.open("https://alexamaralf.github.io/camilasilva/", '_blank'); }
@@ -320,8 +386,17 @@
 
   function loadServices() {
     req('getServices').then(l => {
-      let h = ''; l.forEach(s => {
-        h += `<div class="svc-card"><div class="svc-icon">💅</div><div class="svc-name">${s.nome}</div><div class="svc-price">R$ ${s.valor}</div><div class="svc-actions"><button class="btn-edit" onclick="openEditService(${s.rowIndex}, '${s.nome}', '${s.valor}')">✏️</button><button class="btn-del" onclick="delItem('delService', ${s.rowIndex})">🗑️</button></div></div>`;
+      let h = '';
+      l.forEach(s => {
+        h += `<div class="svc-card">
+          <div class="svc-icon"><i class="fas fa-spa"></i></div>
+          <div class="svc-name">${s.nome}</div>
+          <div class="svc-price">R$ ${s.valor}</div>
+          <div class="svc-actions">
+            <button class="btn-edit" onclick="openEditService(${s.rowIndex}, '${s.nome}', '${s.valor}')" title="Editar"><i class="fas fa-pen"></i></button>
+            <button class="btn-del" onclick="delItem('delService', ${s.rowIndex})" title="Excluir"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>`;
       });
       document.getElementById('serviceList').innerHTML = h || '<div style="text-align:center;padding:20px">Vazio</div>';
     });
@@ -355,16 +430,16 @@
         let ini = nomeDisplay.substring(0, 2).toUpperCase();
         h += `<div class="client-row">
                 <div class="client-info">
-                  <div class="client-avatar">${ini}</div>
+                  <div class="client-avatar"><i class="fas fa-user"></i></div>
                   <div>
                     <div style="font-weight:bold; color:white">${nomeDisplay}</div>
                     <div style="font-size:0.85rem; color:#aaa">${telDisplay}</div>
                   </div>
                 </div>
                 <div class="client-actions">
-                  ${cleanTel ? `<a href="https://wa.me/55${cleanTel}" target="_blank" class="btn-whats">📲</a>` : ''}
-                  <button class="btn-edit" onclick="openEditClient(${c.rowIndex}, '${nomeDisplay}', '${telDisplay}', '${c.obs||''}')">ℹ️</button> 
-                  <button class="btn-del" onclick="delItem('delClient', ${c.rowIndex})">🗑️</button>
+                  ${cleanTel ? `<a href="https://wa.me/55${cleanTel}" target="_blank" class="btn-whats" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
+                  <button class="btn-edit" onclick="openEditClient(${c.rowIndex}, '${nomeDisplay}', '${telDisplay}', '${c.obs||''}')" title="Detalhes"><i class="fas fa-info-circle"></i></button> 
+                  <button class="btn-del" onclick="delItem('delClient', ${c.rowIndex})" title="Excluir"><i class="fas fa-trash"></i></button>
                 </div>
               </div>`;
       });
@@ -408,8 +483,25 @@
       l.forEach(s => {
         let isBooked = s.status === 'Agendado';
         if(isBooked) { c++; r+=parseFloat(String(s.valor).replace("R$","").replace(",",".")||0); }
-        let acts = isBooked ? `<a href="https://wa.me/55${s.tel.replace(/\D/g,'')}" target="_blank" class="btn-whats">WhatsApp</a> <button class="btn-del" onclick="cancelSlot(${s.rowIndex})">Cancelar</button>` : `<button class="btn-p" style="padding:5px 10px" onclick="prepBook(${s.rowIndex}, '${s.hora}')">Reservar</button><button class="btn-del" onclick="delSlot(${s.rowIndex})">🗑️</button>`;
-        h += `<div class="agenda-item ${isBooked?'booked':''} search-item"><div class="ag-header"><div class="time-badge">${s.hora} <span style="font-size:0.7rem;opacity:0.7">${s.data}</span></div><span class="status-tag ${isBooked?'ocup':'disp'}">${s.status}</span></div>${isBooked ? `<div class="ag-details"><div>👤 ${s.cliente}</div><div>✂️ ${s.servicos}</div><div>📞 ${s.tel}</div><div class="ag-price">💰 ${s.valor}</div></div>` : ''}<div class="ag-actions">${acts}</div><div style="display:none" class="search-text">${s.cliente}</div></div>`;
+        let acts = isBooked
+          ? `<a href="https://wa.me/55${s.tel.replace(/\D/g,'')}" target="_blank" class="btn-whats" title="WhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</a> 
+             <button class="btn-del" onclick="cancelSlot(${s.rowIndex})" title="Cancelar"><i class="fas fa-ban"></i> Cancelar</button>`
+          : `<button class="btn-p" style="padding:5px 10px" onclick="prepBook(${s.rowIndex}, '${s.hora}')" title="Reservar"><i class="fas fa-calendar-plus"></i> Reservar</button>
+             <button class="btn-del" onclick="delSlot(${s.rowIndex})" title="Excluir"><i class="fas fa-trash"></i></button>`;
+        h += `<div class="agenda-item ${isBooked?'booked':''} search-item">
+          <div class="ag-header">
+            <div class="time-badge"><i class="fas fa-clock"></i> ${s.hora} <span style="font-size:0.7rem;opacity:0.7">${s.data}</span></div>
+            <span class="status-tag ${isBooked?'ocup':'disp'}">${s.status}</span>
+          </div>
+          ${isBooked ? `<div class="ag-details">
+            <div><i class="fas fa-user"></i> ${s.cliente}</div>
+            <div><i class="fas fa-cut"></i> ${s.servicos}</div>
+            <div><i class="fas fa-phone"></i> ${s.tel}</div>
+            <div class="ag-price"><i class="fas fa-money-bill-wave"></i> ${s.valor}</div>
+          </div>` : ''}
+          <div class="ag-actions">${acts}</div>
+          <div style="display:none" class="search-text">${s.cliente}</div>
+        </div>`;
       });
       document.getElementById('agendaList').innerHTML = h;
       document.getElementById('daySummary').style.display = dt ? 'flex' : 'none';
