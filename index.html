@@ -167,7 +167,7 @@
 
 <script>
   // ✅ URL DE IMPLANTAÇÃO
-  const API_URL = "https://script.google.com/macros/s/AKfycbw5dJYF56NDJBLvyEPrVLY2gR4twbJ8F_aYHkJM4r-y9dbQHI2THbpIuzQKcNhidDXj/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbyK0PsPP_t4fYTBB3TS1B_2ECTXpqTOr4ZsUbRRJv9MtDhL3I4h9Qkj9Z1rHyXJk8Fj/exec";
 
   async function api(act, p = {}) {
     const res = await fetch(API_URL, { method:"POST", body: JSON.stringify({action:act, ...p}) });
