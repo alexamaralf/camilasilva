@@ -151,6 +151,7 @@
   <button id="btn-colabs" class="nav-btn" onclick="show('colabs')" title="Colaboradores"><i class="fas fa-user-tie"></i> Colaboradores</button>
   <div style="flex:1"></div>
   <button class="nav-btn" onclick="openSite()" title="Ver Site Cliente"><i class="fas fa-globe"></i> Ver Site Cliente</button>
+  <button class="nav-btn" onclick="logout()" title="Sair"><i class="fas fa-sign-out-alt"></i> Sair</button>
 </div>
 
 <div class="main">
@@ -335,6 +336,8 @@
     if(!pass) return alert("Digite a senha!");
     TOKEN = pass;
     req('check').then(res => {
+      // persist token locally for future visits
+      try { localStorage.setItem('erpAdminToken', pass); } catch(e) { /* ignore */ }
       document.getElementById('loginOverlay').style.display = 'none';
       checkConnection(); show('dash');
     }).catch(err => { alert("Senha Incorreta!"); TOKEN = ""; });
@@ -525,6 +528,29 @@
   function delItem(act, id) { if(confirm("Excluir?")) req(act, {id:id}).then(()=>{ if(act.includes('Service')) loadServices(); else loadClients(); }); }
   function prepBook(id, info) { document.getElementById('bRowIndex').value=id; document.getElementById('bInfo').innerText="Reservar: "+info; openModal('modalBook'); }
   function adminBook() { const id=document.getElementById('bRowIndex').value; const n=document.getElementById('bNome').value; const v=document.getElementById('bValor').value; req('book', {rowIndex:id, nome:n, telefone:'Admin', servicos:'Manual', valor:v}).then(()=>{closeModal('modalBook');loadAgenda()}); }
+
+  // Persistent login: restore token on load and provide logout
+  window.addEventListener('load', function(){
+    try {
+      const saved = localStorage.getItem('erpAdminToken');
+      if(saved) {
+        TOKEN = saved;
+        // hide login UI and initialize app
+        const lo = document.getElementById('loginOverlay'); if(lo) lo.style.display = 'none';
+        checkConnection(); show('dash');
+      }
+    } catch(e) { /* ignore storage errors */ }
+    // allow Enter to submit password quickly
+    const inp = document.getElementById('adminPass'); if(inp) inp.addEventListener('keypress', function(e){ if(e.key === 'Enter') doLogin(); });
+  });
+
+  function logout() {
+    try { localStorage.removeItem('erpAdminToken'); } catch(e) {}
+    TOKEN = '';
+    const lo = document.getElementById('loginOverlay'); if(lo) lo.style.display = 'flex';
+    // optional: navigate to login view
+    window.scrollTo(0,0);
+  }
 </script>
 </body>
 </html>
